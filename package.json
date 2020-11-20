@@ -2,7 +2,25 @@
 	"name": "vscode-dicom-tag-viewer",
 	"displayName": "DICOM Tag Viewer",
 	"description": "Open a DICOM file and view its tags in an editor window",
+	"keywords": [
+		"dicom"
+	],
 	"version": "0.0.1",
+	"license": "MIT",
+	"icon": "images/icon.png",
+	"publisher": "motivesoft",
+	"author": {
+		"name": "ianabrown",
+		"url": "https://github.com/ianabrown"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Motivesoft/vscode-dicom-tag-viewer.git"
+	},
+	"homepage": "https://github.com/Motivesoft/vscode-dicom-tag-viewer/blob/master/README.md",
+	"bugs": {
+		"url": "https://github.com/Motivesoft/vscode-dicom-tag-viewer/issues"
+	},
 	"engines": {
 		"vscode": "^1.51.0"
 	},
@@ -10,14 +28,27 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:vscode-dicom-tag-viewer.helloWorld"
+		"onCustomEditor:vscode-dicom-tag-viewer.tagViewer",
+		"onCommand:vscode-dicom-tag-viewer.openFile"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
+		"customEditors": [
+			{
+				"viewType": "vscode-dicom-tag-viewer.tagViewer",
+				"displayName": "DICOM tag viewer",
+				"selector": [
+					{
+						"filenamePattern": "*"
+					}
+				],
+				"priority": "option"
+			}
+		],
 		"commands": [
 			{
-				"command": "vscode-dicom-tag-viewer.helloWorld",
-				"title": "Hello World"
+				"command": "vscode-dicom-tag-viewer.openFile",
+				"title": "DICOM Tag Viewer: Open file"
 			}
 		]
 	},
