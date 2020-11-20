@@ -4,6 +4,7 @@ import * as parser from 'dicom-parser';
 import { DicomDocument } from './dicomDocument';
 import { disposeAll } from "./dispose";
 import { getNonce } from './util';
+import { Console } from 'console';
 
 /**
  * Provider for the editor.
@@ -71,16 +72,48 @@ export class TagViewerEditorProvider implements vscode.CustomReadonlyEditorProvi
 		webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview, document);
 	}
 
+	private append(instance: parser.explicitDataSetToJSType[]): string {
+		let html = "";
+
+		html += "<ul>";
+		for( var propertyName in instance ) {
+			var element = instance[propertyName];
+			var text = propertyName + ` (length=${element.length})`;
+			html += `<li>${text}</li>`;
+
+			if( element.constructor===Array) {
+				html += this.append( element );
+			}
+		}
+		html += "</ul>";
+
+		return html;
+	}
+
     private getBodyHTML(document: DicomDocument): string {
 		let dataSet: parser.DataSet;
 		dataSet = parser.parseDicom(document.rawData);
 
+		var options = {
+			omitPrivateAttibutes :false,
+			maxElementLength: 128
+		};
+
+		var instance = parser.explicitDataSetToJS(dataSet, options);
+
 		let html = "";
+		
+		html += "<ul>";
 		for( var propertyName in dataSet.elements ) {
 			var element = dataSet.elements[propertyName];
 			var text = propertyName + ` (length=${element.length})`;
-			html += `<p>${text}</p>`;
+			html += `<li>${text}</li>`;
+
+			if( element.items?.constructor===Array) {
+				html += this.append( element.items );
+			}
 		}
+		html += "</ul>";
 
 		return html;
     }
@@ -115,6 +148,7 @@ export class TagViewerEditorProvider implements vscode.CustomReadonlyEditorProvi
                 <title>DICOM Tag Viewer</title>
 			</head>
 			<body>
+				<div id="status"></div>
 				${body}
 				<script nonce="${nonce}" src="${scriptUri}"></script>
 			</body>
