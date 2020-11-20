@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
+import * as parser from 'dicom-parser';
 import { DicomDocument } from './dicomDocument';
 import { disposeAll } from "./dispose";
 import { getNonce } from './util';
@@ -71,11 +72,17 @@ export class TagViewerEditorProvider implements vscode.CustomReadonlyEditorProvi
 	}
 
     private getBodyHTML(document: DicomDocument): string {
-        return `
-        <div class="column left">
-        <p>This is coming together very slowly</p>
-		</div>
-        `;
+		let dataSet: parser.DataSet;
+		dataSet = parser.parseDicom(document.rawData);
+
+		let html = "";
+		for( var propertyName in dataSet.elements ) {
+			var element = dataSet.elements[propertyName];
+			var text = propertyName + ` (length=${element.length})`;
+			html += `<p>${text}</p>`;
+		}
+
+		return html;
     }
 
     private getHtmlForWebview(webview: vscode.Webview, document: DicomDocument): string {
@@ -105,8 +112,7 @@ export class TagViewerEditorProvider implements vscode.CustomReadonlyEditorProvi
 				<link href="${styleMainUri}" rel="stylesheet" />
                 -->
 
-                <title>Tag Viewer</title>
-                <h1>Hello world</h1>
+                <title>DICOM Tag Viewer</title>
 			</head>
 			<body>
 				${body}
